@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,7 +51,8 @@ namespace _12TPIPROJECT.Repositories
                         brands.Add(new Brand(BrandID, BrandName));
                     }
                 }
-            } return brands;
+            }
+            return brands;
         }
 
         public int UpdateBrandName(int brandId, string brandName)
@@ -64,7 +66,7 @@ namespace _12TPIPROJECT.Repositories
 
 
             }
-                
+
 
         }
 
@@ -77,6 +79,24 @@ namespace _12TPIPROJECT.Repositories
             }
 
         }
+
+        public int DeleteBrandByName(string brandName)
+        {
+            using (SqlCommand cmd = new SqlCommand("DELTE FROM production.Brands WHERE BRAND_NAME = @BrandName", conn))
+            {
+                cmd.Parameters.AddWithValue("@BrandName", brandName);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void CloseConnection()
+        {
+            if (conn != null && conn.State == ConnectionState.Open)
+            {
+                conn.Close();
+                Console.WriteLine("Connection closed");
+            }
+        }
     }
-}   
+}
 

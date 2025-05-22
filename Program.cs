@@ -33,13 +33,14 @@ namespace _12TPIPROJECT
                     InsertNewBrand();
                     break;
                 case "4":
-                    //DeleteBrandByName();
+                    DeleteBrandByName();
                     break;
 
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
                     break;
             }
+            storageManager.CloseConnection();
         }
 
         private static void UpdateBrandName()
@@ -63,5 +64,15 @@ namespace _12TPIPROJECT
             view.DisplayMessage($"New brand insrted with ID: {generatedId}");
 
         }
+
+        private static void DeleteBrandByName()
+        {
+            view.DisplayMessage("Enter the brand name to delete: ");
+            string brandName = view.GetInput();
+            int rowsAffected = storageManager.DeleteBrandByName(brandName);
+            view.DisplayMessage($"Rows affected: {rowsAffected}");
+        }
+
+
     }
 }
