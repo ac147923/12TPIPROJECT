@@ -26,7 +26,7 @@ namespace _12TPIPROJECT.view
         {
             foreach (Brand brand in brands)
             {
-                Console.WriteLine($"{brand.BrandID}, {brand.BrandName}");
+                Console.WriteLine($"{brand.BrandId}, {brand.BrandName}");
             }
         }
 

@@ -8,12 +8,12 @@ namespace _12TPIPROJECT.models
 {
     public class Brand
     {
-        public int BrandID { get; set; }
+        public int BrandId { get; set; }
         public string BrandName { get; set; }
 
-        public Brand(int brandID, string brandName)
+        public Brand(int brandId, string brandName)
         {
-            BrandID = brandID;
+            BrandId = brandId;
             BrandName = brandName;
         }
     }

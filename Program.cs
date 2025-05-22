@@ -30,7 +30,7 @@ namespace _12TPIPROJECT
                     UpdateBrandName();
                     break;
                 case "3":
-                    //InsertNewBrand();
+                    InsertNewBrand();
                     break;
                 case "4":
                     //DeleteBrandByName();
@@ -45,11 +45,22 @@ namespace _12TPIPROJECT
         private static void UpdateBrandName()
         {
             view.DisplayMessage("Enter the brand_id to update:");
-            int brandID = view.GetIntInput();
+            int brandId = view.GetIntInput();
             view.DisplayMessage("Enter the new brand name:");
             string brandName = view.GetInput();
-            int rowsAffected = storageManager.UpdateBrandName(brandID, brandName);
+            int rowsAffected = storageManager.UpdateBrandName(brandId, brandName);
             view.DisplayMessage($"Rows affected: {rowsAffected}");
+
+        }
+
+        private static void InsertNewBrand()
+        {
+            view.DisplayMessage("Enter new brand name:");
+            string brandName = view.GetInput();
+            int brandId = 0; 
+            Brand brand1 = new Brand(brandId, brandName);
+            int generatedId = storageManager.InsertBrand(brand1);
+            view.DisplayMessage($"New brand insrted with ID: {generatedId}");
 
         }
     }

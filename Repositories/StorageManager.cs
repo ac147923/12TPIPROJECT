@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using _12TPIPROJECT.models;
+using _12TPIPROJECT.view;
+using _12TPIPROJECT.Repositories;
 using Microsoft.Data.SqlClient;
 
 namespace _12TPIPROJECT.Repositories
@@ -17,7 +19,7 @@ namespace _12TPIPROJECT.Repositories
             try
             {
                 conn = new SqlConnection(connectionString);
-                conn.open();
+                conn.Open();
                 Console.WriteLine("connection successfull");
             }
             catch (SqlException e)
@@ -41,24 +43,40 @@ namespace _12TPIPROJECT.Repositories
             {
                 using (SqlDataReader reader = cmd.ExecuteReader())
                 {
-                    while (reader.read())
+                    while (reader.Read())
                     {
                         int BrandID = Convert.ToInt32(reader["BrandID"]);
                         string BrandName = reader["BrandName"].ToString();
-                        brands.Add(new)
+                        brands.Add(new Brand(BrandID, BrandName));
                     }
                 }
-            }
+            } return brands;
         }
 
         public int UpdateBrandName(int brandId, string brandName)
         {
-            using (SqlCommand cmd = new SqlCommand($"UPDATE production.Brands SET BRAND_NAME = @BrandName WHERE BRAND_ID = @BrandID", conn)
+            using (SqlCommand cmd = new SqlCommand($"UPDATE production.Brands SET BRAND_NAME = @BrandName WHERE BRAND_ID = @BrandID", conn))
             {
-                cmd.Parameters.AddWithValue("@BrandName", brandName),
+
+                cmd.Parameters.AddWithValue("@BrandName", brandName);
                 cmd.Parameters.AddWithValue("@BrandId", brandId);
                 return cmd.ExecuteNonQuery();
+
+
             }
+                
+
         }
-    } }
+
+        public int InsertBrand(Brand brandtemp)
+        {
+            using (SqlCommand cmd = new SqlCommand("INSERT INTO production.Brands (BRAND_NAME) VALUES (@BrandName); SELECT SCOPE_IDENTITY();", conn))
+            {
+                cmd.Parameters.AddWithValue("@BrandName", brandtemp.BrandName);
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+
+        }
+    }
+}   
 
