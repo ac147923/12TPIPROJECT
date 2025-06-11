@@ -10,7 +10,7 @@ namespace _12TPIPROJECT
         static void Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
-            string connectionString = "Data Source=(localdb)\\ProjectModels;Initial Catalog=TPISQL2025;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
+            string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"C:\\Users\\ac147923\\OneDrive - Avondale College\\Documents\\.2025Code\\12TPIPROJECT\\DB\\12TpiCricketDatabase.mdf\";Integrated Security=True;Connect Timeout=30";
 
             storageManager = new StorageManager(connectionString);
             ConsoleView view = new ConsoleView();
@@ -20,20 +20,20 @@ namespace _12TPIPROJECT
             {
                 case "1":
                     {
-                        List<Brand> brands =
-                            storageManager.GetAllBrands();
-                        view.DisplayBrands(brands);
+                        List<Country> countries =
+                            storageManager.GetAllCountries();
+                        view.DisplayCountries(countries);
 
                     }
                     break;
                 case "2":
-                    UpdateBrandName();
+                    UpdateCountryName();
                     break;
                 case "3":
-                    InsertNewBrand();
+                    InsertNewCountry();
                     break;
                 case "4":
-                    DeleteBrandByName();
+                    DeleteCountryByName();
                     break;
 
                 default:
@@ -43,33 +43,33 @@ namespace _12TPIPROJECT
             storageManager.CloseConnection();
         }
 
-        private static void UpdateBrandName()
+        private static void UpdateCountryName()
         {
-            view.DisplayMessage("Enter the brand_id to update:");
-            int brandId = view.GetIntInput();
-            view.DisplayMessage("Enter the new brand name:");
-            string brandName = view.GetInput();
-            int rowsAffected = storageManager.UpdateBrandName(brandId, brandName);
+            view.DisplayMessage("Enter the country_id to update:");
+            int countryID = view.GetIntInput();
+            view.DisplayMessage("Enter the new country name:");
+            string countryName = view.GetInput();
+            int rowsAffected = storageManager.UpdateCountryName(countryID, countryName);
             view.DisplayMessage($"Rows affected: {rowsAffected}");
 
         }
 
-        private static void InsertNewBrand()
+        private static void InsertNewCountry()
         {
-            view.DisplayMessage("Enter new brand name:");
-            string brandName = view.GetInput();
-            int brandId = 0; 
-            Brand brand1 = new Brand(brandId, brandName);
-            int generatedId = storageManager.InsertBrand(brand1);
-            view.DisplayMessage($"New brand insrted with ID: {generatedId}");
+            view.DisplayMessage("Enter new country name:");
+            string countryName = view.GetInput();
+            int countryID = 0; 
+            Country country1 = new Country(countryID, countryName);
+            int generatedID = storageManager.InsertCountry(country1);
+            view.DisplayMessage($"New country insrted with ID: {generatedID}");
 
         }
 
-        private static void DeleteBrandByName()
+        private static void DeleteCountryByName()
         {
-            view.DisplayMessage("Enter the brand name to delete: ");
-            string brandName = view.GetInput();
-            int rowsAffected = storageManager.DeleteBrandByName(brandName);
+            view.DisplayMessage("Enter the country name to delete: ");
+            string countryName = view.GetInput();
+            int rowsAffected = storageManager.DeleteCountryByName(countryName);
             view.DisplayMessage($"Rows affected: {rowsAffected}");
         }
 

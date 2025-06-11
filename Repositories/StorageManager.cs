@@ -36,32 +36,32 @@ namespace _12TPIPROJECT.Repositories
             }
         }
 
-        public List<Brand> GetAllBrands()
+        public List<Country> GetAllCountries()
         {
-            List<Brand> brands = new List<Brand>();
-            string sqlString = "SELECT * From dbo.tblBrand";
+            List<Country> countries = new List<Country>();
+            string sqlString = "SELECT * From l_locations.tableCountry";
             using (SqlCommand cmd = new SqlCommand(sqlString, conn))
             {
                 using (SqlDataReader reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        int BrandID = Convert.ToInt32(reader["BrandID"]);
-                        string BrandName = reader["BrandName"].ToString();
-                        brands.Add(new Brand(BrandID, BrandName));
+                        int CountryID = Convert.ToInt32(reader["CountryID"]);
+                        string CountryName = reader["CountryName"].ToString();
+                        countries.Add(new Country(CountryID, CountryName));
                     }
                 }
             }
-            return brands;
+            return countries;
         }
 
-        public int UpdateBrandName(int brandId, string brandName)
+        public int UpdateCountryName(int countryID, string countryName)
         {
-            using (SqlCommand cmd = new SqlCommand($"UPDATE production.Brands SET BRAND_NAME = @BrandName WHERE BRAND_ID = @BrandID", conn))
+            using (SqlCommand cmd = new SqlCommand($"UPDATE l_locations.tableCountry SET countryName = @CountryName WHERE countryID = @CountryID", conn))
             {
 
-                cmd.Parameters.AddWithValue("@BrandName", brandName);
-                cmd.Parameters.AddWithValue("@BrandId", brandId);
+                cmd.Parameters.AddWithValue("@CountryName", countryName);
+                cmd.Parameters.AddWithValue("@CountryID", countryID);
                 return cmd.ExecuteNonQuery();
 
 
@@ -70,21 +70,74 @@ namespace _12TPIPROJECT.Repositories
 
         }
 
-        public int InsertBrand(Brand brandtemp)
+        public int InsertCountry(Country countrytemp)
         {
-            using (SqlCommand cmd = new SqlCommand("INSERT INTO production.Brands (BRAND_NAME) VALUES (@BrandName); SELECT SCOPE_IDENTITY();", conn))
+            using (SqlCommand cmd = new SqlCommand("INSERT INTO l_locations.tableCountry (countryName) VALUES (@CountryName); SELECT SCOPE_IDENTITY();", conn))
             {
-                cmd.Parameters.AddWithValue("@BrandName", brandtemp.BrandName);
+                cmd.Parameters.AddWithValue("@CountryName", countrytemp.CountryName);
                 return Convert.ToInt32(cmd.ExecuteScalar());
             }
 
         }
 
-        public int DeleteBrandByName(string brandName)
+        public int DeleteCountryByName(string countryName)
         {
-            using (SqlCommand cmd = new SqlCommand("DELTE FROM production.Brands WHERE BRAND_NAME = @BrandName", conn))
+            using (SqlCommand cmd = new SqlCommand("DELTE FROM l_locations.tableCountry WHERE countryName = @CountryName", conn))
             {
-                cmd.Parameters.AddWithValue("@BrandName", brandName);
+                cmd.Parameters.AddWithValue("@CountryName", countryName);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public List<City> GetAllCities()
+        {
+            List<City> cities = new List<City>();
+            string sqlString = "SELECT * From l_locations.tableCity";
+            using (SqlCommand cmd = new SqlCommand(sqlString, conn))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int CityID = Convert.ToInt32(reader["CityID"]);
+                        string CityName = reader["CityName"].ToString();
+                        cities.Add(new City(CityID, CityName));
+                    }
+                }
+            }
+            return cities;
+        }
+        //---------------------------------------------------------------------------------------------------------------------------------------------------
+        public int UpdateCityName(int cityID, string cityName)
+        {
+            using (SqlCommand cmd = new SqlCommand($"UPDATE l_locations.tableCity SET cityName = @CityName WHERE cityID = @CityID", conn))
+            {
+
+                cmd.Parameters.AddWithValue("@CityName", cityName);
+                cmd.Parameters.AddWithValue("@CityID", cityID);
+                return cmd.ExecuteNonQuery();
+
+
+            }
+
+
+        }
+
+        public int InsertCity(City citytemp)
+        {
+            using (SqlCommand cmd = new SqlCommand("INSERT INTO l_locations.tableCity (cityName) VALUES (@CityName); SELECT SCOPE_IDENTITY();", conn))
+            {
+                cmd.Parameters.AddWithValue("@CityName", citytemp.CityName);
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+
+        }
+
+        public int DeleteCityByName(string cityName)
+        {
+            using (SqlCommand cmd = new SqlCommand("DELTE FROM l_locations.tableCity WHERE cityName = @CityName", conn))
+            {
+                cmd.Parameters.AddWithValue("@CityName", cityName);
                 return cmd.ExecuteNonQuery();
             }
         }
