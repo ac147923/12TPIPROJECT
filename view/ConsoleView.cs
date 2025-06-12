@@ -14,9 +14,9 @@ namespace _12TPIPROJECT.view
             Console.WriteLine("Welcome to my Cricket Database");
             Console.WriteLine("Menu:");
             Console.WriteLine("1. View All records in Country");
-            Console.WriteLine("2. Update a country's name by country_id");
+            Console.WriteLine("2. Update a country's name by countryID");
             Console.WriteLine("3. Insert a new country");
-            Console.WriteLine("4. Delete a country by country_name");
+            Console.WriteLine("4. Delete a country by countryName");
             Console.WriteLine("Select an option: ");
             return Console.ReadLine();
 
