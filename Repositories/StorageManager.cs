@@ -88,7 +88,7 @@ namespace _12TPIPROJECT.Repositories
                 return cmd.ExecuteNonQuery();
             }
         }
-
+        //---------------------------------------------------------------------------------------------------------------------------------------------------
         public List<City> GetAllCities()
         {
             List<City> cities = new List<City>();
@@ -107,7 +107,7 @@ namespace _12TPIPROJECT.Repositories
             }
             return cities;
         }
-        //---------------------------------------------------------------------------------------------------------------------------------------------------
+
         public int UpdateCityName(int cityID, string cityName)
         {
             using (SqlCommand cmd = new SqlCommand($"UPDATE l_locations.tableCity SET cityName = @CityName WHERE cityID = @CityID", conn))
@@ -140,6 +140,50 @@ namespace _12TPIPROJECT.Repositories
                 cmd.Parameters.AddWithValue("@CityName", cityName);
                 return cmd.ExecuteNonQuery();
             }
+        }
+
+        public List<Player> GetAllPlayers()
+        {
+            List<Player> players = new List<Player>();
+            string sqlString = "SELECT * From t_teams.tablePlayer";
+            using (SqlCommand cmd = new SqlCommand(sqlString, conn))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int PlayerID = Convert.ToInt32(reader["PlayerID"]);
+                        string PlayerName = reader["PlayerName"].ToString();
+                        players.Add(new Player(PlayerID, PlayerName));
+                    }
+                }
+            }
+            return players;
+        }
+
+        public int UpdatePlayerName(int playerID, string playerName)
+        {
+            using (SqlCommand cmd = new SqlCommand($"UPDATE t_teams.tablePlayer SET playerName = @PlayerName WHERE playerID = @PlayerID", conn))
+            {
+
+                cmd.Parameters.AddWithValue("@PlayerName", playerName);
+                cmd.Parameters.AddWithValue("@PlayerID", playerID);
+                return cmd.ExecuteNonQuery();
+
+
+            }
+
+
+        }
+
+        public int InsertPlayer(Player playertemp)
+        {
+            using (SqlCommand cmd = new SqlCommand("INSERT INTO t_teams.tablePlayer (playerName) VALUES (@PlayerName); SELECT SCOPE_IDENTITY();", conn))
+            {
+                cmd.Parameters.AddWithValue("@PlayerName", playertemp.PlayerName);
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+
         }
 
         public void CloseConnection()
