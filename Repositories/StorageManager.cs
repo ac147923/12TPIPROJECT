@@ -186,6 +186,15 @@ namespace _12TPIPROJECT.Repositories
 
         }
 
+        public int DeletePlayerByName(string playerName)
+        {
+            using (SqlCommand cmd = new SqlCommand("DELTE FROM t_teams.tablePlayer WHERE playerName = @PlayerName", conn))
+            {
+                cmd.Parameters.AddWithValue("@PlayerName", playerName);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
         public void CloseConnection()
         {
             if (conn != null && conn.State == ConnectionState.Open)
