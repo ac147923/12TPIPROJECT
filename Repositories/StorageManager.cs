@@ -195,6 +195,258 @@ namespace _12TPIPROJECT.Repositories
             }
         }
 
+        public List<Coach> GetAllCoaches()
+        {
+            List<Coach> coaches = new List<Coach>();
+            string sqlString = "SELECT * FROM t_teams.tableCoaches";
+            using (SqlCommand cmd = new SqlCommand(sqlString, conn))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int coachID = Convert.ToInt32(reader["coachID"]);
+                        string coachName = reader["coachName"].ToString();
+                        coaches.Add(new Coach(coachID, coachName));
+                    }
+                }
+            }
+            return coaches;
+        }
+
+        public int InsertCoach(Coach coach)
+        {
+            using (SqlCommand cmd = new SqlCommand("INSERT INTO t_teams.tableCoaches (coachName) VALUES (@CoachName); SELECT SCOPE_IDENTITY();", conn))
+            {
+                cmd.Parameters.AddWithValue("@CoachName", coach.CoachName);
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+        }
+
+        public int UpdateCoachName(int coachID, string coachName)
+        {
+            using (SqlCommand cmd = new SqlCommand("UPDATE t_teams.tableCoaches SET coachName = @CoachName WHERE coachID = @CoachID", conn))
+            {
+                cmd.Parameters.AddWithValue("@CoachName", coachName);
+                cmd.Parameters.AddWithValue("@CoachID", coachID);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public int DeleteCoachByName(string coachName)
+        {
+            using (SqlCommand cmd = new SqlCommand("DELETE FROM t_teams.tableCoaches WHERE coachName = @CoachName", conn))
+            {
+                cmd.Parameters.AddWithValue("@CoachName", coachName);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public List<DomesticTeam> GetAllDomesticTeams()
+        {
+            List<DomesticTeam> teams = new List<DomesticTeam>();
+            string sqlString = "SELECT * FROM t_teams.tableDomesticTeam";
+            using (SqlCommand cmd = new SqlCommand(sqlString, conn))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int domesticTeamID = Convert.ToInt32(reader["domesticTeamID"]);
+                        string domesticTeamName = reader["domesticTeamName"].ToString();
+                        int cityID = Convert.ToInt32(reader["cityID"]);
+                        teams.Add(new DomesticTeam(domesticTeamID, domesticTeamName, cityID));
+                    }
+                }
+            }
+            return teams;
+        }
+
+        public int InsertDomesticTeam(DomesticTeam team)
+        {
+            using (SqlCommand cmd = new SqlCommand("INSERT INTO t_teams.tableDomesticTeam (domesticTeamName, cityID) VALUES (@TeamName, @CityID); SELECT SCOPE_IDENTITY();", conn))
+            {
+                cmd.Parameters.AddWithValue("@TeamName", team.DomesticTeamName);
+                cmd.Parameters.AddWithValue("@CityID", team.CityID);
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+        }
+
+        public int UpdateDomesticTeamName(int teamID, string teamName)
+        {
+            using (SqlCommand cmd = new SqlCommand("UPDATE t_teams.tableDomesticTeam SET domesticTeamName = @TeamName WHERE domesticTeamID = @TeamID", conn))
+            {
+                cmd.Parameters.AddWithValue("@TeamName", teamName);
+                cmd.Parameters.AddWithValue("@TeamID", teamID);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public int DeleteDomesticTeamByName(string teamName)
+        {
+            using (SqlCommand cmd = new SqlCommand("DELETE FROM t_teams.tableDomesticTeam WHERE domesticTeamName = @TeamName", conn))
+            {
+                cmd.Parameters.AddWithValue("@TeamName", teamName);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public List<PlayerAndTeamBridge> GetAllPlayerAndTeamBridges()
+        {
+            List<PlayerAndTeamBridge> bridges = new List<PlayerAndTeamBridge>();
+            string sqlString = "SELECT * FROM t_teams.tablePlayerAndTeamBridge";
+            using (SqlCommand cmd = new SqlCommand(sqlString, conn))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int bridgeID = Convert.ToInt32(reader["playerAndTeamBridgeID"]);
+                        int playerID = Convert.ToInt32(reader["playerID"]);
+                        int domesticTeamID = Convert.ToInt32(reader["domesticTeamID"]);
+                        DateTime dateJoined = Convert.ToDateTime(reader["dateJoined"]);
+                        DateTime dateLeft = Convert.ToDateTime(reader["dateLeft"]);
+                        int catchesTaken = Convert.ToInt32(reader["catchesTaken"]);
+                        int catchesDropped = Convert.ToInt32(reader["catchesDropped"]);
+                        int totalWickets = Convert.ToInt32(reader["totalWickets"]);
+                        int totalRuns = Convert.ToInt32(reader["totalRuns"]);
+                        bridges.Add(new PlayerAndTeamBridge(
+                            bridgeID,
+                            playerID,
+                            domesticTeamID,
+                            dateJoined,
+                            dateLeft,
+                            catchesTaken,
+                            catchesDropped,
+                            totalWickets,
+                            totalRuns
+                        ));
+                    }
+                }
+            }
+            return bridges;
+        }
+
+        public int InsertPlayerAndTeamBridge(PlayerAndTeamBridge bridge)
+        {
+            using (SqlCommand cmd = new SqlCommand(
+                @"INSERT INTO t_teams.tablePlayerAndTeamBridge 
+        (playerID, domesticTeamID, dateJoined, dateLeft, catchesTaken, catchesDropped, totalWickets, totalRuns)
+        VALUES (@PlayerID, @TeamID, @DateJoined, @DateLeft, @CatchesTaken, @CatchesDropped, @TotalWickets, @TotalRuns);
+        SELECT SCOPE_IDENTITY();", conn))
+            {
+                cmd.Parameters.AddWithValue("@PlayerID", bridge.PlayerID);
+                cmd.Parameters.AddWithValue("@TeamID", bridge.DomesticTeamID);
+                cmd.Parameters.AddWithValue("@DateJoined", bridge.DateJoined);
+                cmd.Parameters.AddWithValue("@DateLeft", bridge.DateLeft);
+                cmd.Parameters.AddWithValue("@CatchesTaken", bridge.CatchesTaken);
+                cmd.Parameters.AddWithValue("@CatchesDropped", bridge.CatchesDropped);
+                cmd.Parameters.AddWithValue("@TotalWickets", bridge.TotalWickets);
+                cmd.Parameters.AddWithValue("@TotalRuns", bridge.TotalRuns);
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+        }
+
+        public int UpdatePlayerAndTeamBridge(PlayerAndTeamBridge bridge)
+        {
+            using (SqlCommand cmd = new SqlCommand(
+                @"UPDATE t_teams.tablePlayerAndTeamBridge SET 
+          playerID = @PlayerID, domesticTeamID = @TeamID, dateJoined = @DateJoined, dateLeft = @DateLeft,
+          catchesTaken = @CatchesTaken, catchesDropped = @CatchesDropped, 
+          totalWickets = @TotalWickets, totalRuns = @TotalRuns
+        WHERE playerAndTeamBridgeID = @BridgeID", conn))
+            {
+                cmd.Parameters.AddWithValue("@PlayerID", bridge.PlayerID);
+                cmd.Parameters.AddWithValue("@TeamID", bridge.DomesticTeamID);
+                cmd.Parameters.AddWithValue("@DateJoined", bridge.DateJoined);
+                cmd.Parameters.AddWithValue("@DateLeft", bridge.DateLeft);
+                cmd.Parameters.AddWithValue("@CatchesTaken", bridge.CatchesTaken);
+                cmd.Parameters.AddWithValue("@CatchesDropped", bridge.CatchesDropped);
+                cmd.Parameters.AddWithValue("@TotalWickets", bridge.TotalWickets);
+                cmd.Parameters.AddWithValue("@TotalRuns", bridge.TotalRuns);
+                cmd.Parameters.AddWithValue("@BridgeID", bridge.PlayerAndTeamBridgeID);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public int DeletePlayerAndTeamBridge(int bridgeID)
+        {
+            using (SqlCommand cmd = new SqlCommand("DELETE FROM t_teams.tablePlayerAndTeamBridge WHERE playerAndTeamBridgeID = @BridgeID", conn))
+            {
+                cmd.Parameters.AddWithValue("@BridgeID", bridgeID);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public List<CoachAndTeamBridge> GetAllCoachAndTeamBridges()
+        {
+            List<CoachAndTeamBridge> bridges = new List<CoachAndTeamBridge>();
+            string sqlString = "SELECT * FROM t_teams.tableCoachAndTeamBridge";
+            using (SqlCommand cmd = new SqlCommand(sqlString, conn))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int bridgeID = Convert.ToInt32(reader["coachAndTeamBridgeID"]);
+                        int domesticTeamID = Convert.ToInt32(reader["domesticTeamID"]);
+                        int coachID = Convert.ToInt32(reader["coachID"]);
+                        DateTime dateJoined = Convert.ToDateTime(reader["dateJoined"]);
+                        DateTime dateLeft = Convert.ToDateTime(reader["dateLeft"]);
+                        bridges.Add(new CoachAndTeamBridge(
+                            bridgeID,
+                            domesticTeamID,
+                            coachID,
+                            dateJoined,
+                            dateLeft
+                        ));
+                    }
+                }
+            }
+            return bridges;
+        }
+
+        public int InsertCoachAndTeamBridge(CoachAndTeamBridge bridge)
+        {
+            using (SqlCommand cmd = new SqlCommand(
+                @"INSERT INTO t_teams.tableCoachAndTeamBridge 
+        (domesticTeamID, coachID, dateJoined, dateLeft)
+        VALUES (@TeamID, @CoachID, @DateJoined, @DateLeft);
+        SELECT SCOPE_IDENTITY();", conn))
+            {
+                cmd.Parameters.AddWithValue("@TeamID", bridge.DomesticTeamID);
+                cmd.Parameters.AddWithValue("@CoachID", bridge.CoachID);
+                cmd.Parameters.AddWithValue("@DateJoined", bridge.DateJoined);
+                cmd.Parameters.AddWithValue("@DateLeft", bridge.DateLeft);
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+        }
+
+        public int UpdateCoachAndTeamBridge(CoachAndTeamBridge bridge)
+        {
+            using (SqlCommand cmd = new SqlCommand(
+                @"UPDATE t_teams.tableCoachAndTeamBridge SET 
+          domesticTeamID = @TeamID, coachID = @CoachID, dateJoined = @DateJoined, dateLeft = @DateLeft
+        WHERE coachAndTeamBridgeID = @BridgeID", conn))
+            {
+                cmd.Parameters.AddWithValue("@TeamID", bridge.DomesticTeamID);
+                cmd.Parameters.AddWithValue("@CoachID", bridge.CoachID);
+                cmd.Parameters.AddWithValue("@DateJoined", bridge.DateJoined);
+                cmd.Parameters.AddWithValue("@DateLeft", bridge.DateLeft);
+                cmd.Parameters.AddWithValue("@BridgeID", bridge.CoachAndTeamBridgeID);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public int DeleteCoachAndTeamBridge(int bridgeID)
+        {
+            using (SqlCommand cmd = new SqlCommand("DELETE FROM t_teams.tableCoachAndTeamBridge WHERE coachAndTeamBridgeID = @BridgeID", conn))
+            {
+                cmd.Parameters.AddWithValue("@BridgeID", bridgeID);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
         public void CloseConnection()
         {
             if (conn != null && conn.State == ConnectionState.Open)
