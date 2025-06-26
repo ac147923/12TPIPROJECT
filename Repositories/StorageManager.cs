@@ -447,6 +447,60 @@ namespace _12TPIPROJECT.Repositories
             }
         }
 
+        public List<User> GetAllUsers()
+        {
+            List<User> users = new List<User>();
+            string sqlString = "SELECT * FROM users";
+            using (SqlCommand cmd = new SqlCommand(sqlString, conn))
+            {
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int userID = Convert.ToInt32(reader["userID"]);
+                        string username = reader["username"].ToString();
+                        string pin = reader["password"].ToString();
+                        string role = reader["role"].ToString();
+                        users.Add(new User(userID, username, pin, role));
+                    }
+                }
+            }
+            return users;
+        }
+
+        public int InsertUser(User user)
+        {
+            using (SqlCommand cmd = new SqlCommand("INSERT INTO users (Username, Password, Role) VALUES (@Username, @Pin, @Role); SELECT SCOPE_IDENTITY();", conn))
+            {
+                cmd.Parameters.AddWithValue("@Username", user.Username);
+                cmd.Parameters.AddWithValue("@Pin", user.Pin);
+                cmd.Parameters.AddWithValue("@Role", user.Role);
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            }
+        }
+
+        public User GetUserByUsernameAndPin(string username, string pin)
+        {
+            using (SqlCommand cmd = new SqlCommand("SELECT * FROM users WHERE Username = @Username AND Password = @Pin", conn))
+            {
+                cmd.Parameters.AddWithValue("@Username", username);
+                cmd.Parameters.AddWithValue("@Pin", pin);
+                using (var reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return new User(
+                            Convert.ToInt32(reader["UserID"]),
+                            reader["Username"].ToString(),
+                            reader["Password"].ToString(),
+                            reader["Role"].ToString()
+                        );
+                    }
+                }
+            }
+            return null;
+        }
+
         public void CloseConnection()
         {
             if (conn != null && conn.State == ConnectionState.Open)

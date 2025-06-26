@@ -9,10 +9,10 @@ namespace _12TPIPROJECT.view
 {
     public class ConsoleView
     {
-        public string DisplayMenu()
+        
+
+        public string DisplayCountryMenu()
         {
-            Console.WriteLine("Welcome to my Cricket Database");
-            Console.WriteLine("Menu:");
             Console.WriteLine("1. View All records in Country");
             Console.WriteLine("2. Update a country's name by countryID");
             Console.WriteLine("3. Insert a new country");

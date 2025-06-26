@@ -14,7 +14,7 @@ namespace _12TPIPROJECT
 
             storageManager = new StorageManager(connectionString);
             ConsoleView view = new ConsoleView();
-            string choice = view.DisplayMenu();
+            string choice = view.DisplayCountryMenu();
 
             switch (choice)
             {
@@ -42,6 +42,8 @@ namespace _12TPIPROJECT
             }
             storageManager.CloseConnection();
         }
+
+
 
         private static void UpdateCountryName()
         {
@@ -72,6 +74,8 @@ namespace _12TPIPROJECT
             int rowsAffected = storageManager.DeleteCountryByName(countryName);
             view.DisplayMessage($"Rows affected: {rowsAffected}");
         }
+
+
 
 
     }
