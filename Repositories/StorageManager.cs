@@ -501,6 +501,27 @@ namespace _12TPIPROJECT.Repositories
             return null;
         }
 
+        public int UpdateUser(int userID, string username, string password, string role)
+        {
+            using (SqlCommand cmd = new SqlCommand("UPDATE users SET Username = @Username, Password = @Password, Role = @Role WHERE UserID = @UserID", conn))
+            {
+                cmd.Parameters.AddWithValue("@Username", username);
+                cmd.Parameters.AddWithValue("@Password", password);
+                cmd.Parameters.AddWithValue("@Role", role);
+                cmd.Parameters.AddWithValue("@UserID", userID);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
+        public int DeleteUser(int userID)
+        {
+            using (SqlCommand cmd = new SqlCommand("DELETE FROM users WHERE UserID = @UserID", conn))
+            {
+                cmd.Parameters.AddWithValue("@UserID", userID);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+
         public void CloseConnection()
         {
             if (conn != null && conn.State == ConnectionState.Open)
