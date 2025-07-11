@@ -11,9 +11,55 @@ using Microsoft.Data.SqlClient;
 
 namespace _12TPIPROJECT.Repositories
 {
+
     public class StorageManager
     {
         private SqlConnection conn;
+        public bool RegisterUser(string username, string password)
+        {
+
+            string checkSql = "SELECT COUNT(*) FROM tblUser WHERE Username = @Username";
+            using (SqlCommand checkCmd = new SqlCommand(checkSql, conn))
+            {
+                checkCmd.Parameters.AddWithValue("@Username", username);
+                int count = (int)checkCmd.ExecuteScalar();
+                if (count > 0)
+                    return false;
+            }
+
+
+            string insertSql = "INSERT INTO tblUser (Username, Password, IsAdmin) VALUES (@Username, @Password, 0)";
+            using (SqlCommand insertCmd = new SqlCommand(insertSql, conn))
+            {
+                insertCmd.Parameters.AddWithValue("@Username", username);
+                insertCmd.Parameters.AddWithValue("@Password", password);
+                insertCmd.ExecuteNonQuery();
+            }
+            return true;
+        }
+
+        public User AuthenticateUser(string username, string password)
+        {
+            string sql = "SELECT UserID, Username, Password, IsAdmin FROM tblUser WHERE Username = @Username AND Password = @Password";
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            {
+                cmd.Parameters.AddWithValue("@Username", username);
+                cmd.Parameters.AddWithValue("@Password", password);
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        int userID = (int)reader["UserID"];
+                        string usernameDb = reader["Username"].ToString();
+                        string pin = reader["Password"].ToString();
+                        bool isAdmin = (bool)reader["IsAdmin"];
+                        string role = isAdmin ? "Admin" : "User";
+                        return new User(userID, usernameDb, pin, role);
+                    }
+                }
+            }
+            return null;
+        }
 
         public StorageManager(string connectionString)
         {
@@ -82,7 +128,7 @@ namespace _12TPIPROJECT.Repositories
 
         public int DeleteCountryByName(string countryName)
         {
-            using (SqlCommand cmd = new SqlCommand("DELTE FROM l_locations.tableCountry WHERE countryName = @CountryName", conn))
+            using (SqlCommand cmd = new SqlCommand("DELETE FROM l_locations.tableCountry WHERE countryName = @CountryName", conn))
             {
                 cmd.Parameters.AddWithValue("@CountryName", countryName);
                 return cmd.ExecuteNonQuery();
@@ -135,7 +181,7 @@ namespace _12TPIPROJECT.Repositories
 
         public int DeleteCityByName(string cityName)
         {
-            using (SqlCommand cmd = new SqlCommand("DELTE FROM l_locations.tableCity WHERE cityName = @CityName", conn))
+            using (SqlCommand cmd = new SqlCommand("DELETE FROM l_locations.tableCity WHERE cityName = @CityName", conn))
             {
                 cmd.Parameters.AddWithValue("@CityName", cityName);
                 return cmd.ExecuteNonQuery();
@@ -188,7 +234,7 @@ namespace _12TPIPROJECT.Repositories
 
         public int DeletePlayerByName(string playerName)
         {
-            using (SqlCommand cmd = new SqlCommand("DELTE FROM t_teams.tablePlayer WHERE playerName = @PlayerName", conn))
+            using (SqlCommand cmd = new SqlCommand("DELETE FROM t_teams.tablePlayer WHERE playerName = @PlayerName", conn))
             {
                 cmd.Parameters.AddWithValue("@PlayerName", playerName);
                 return cmd.ExecuteNonQuery();
@@ -499,27 +545,6 @@ namespace _12TPIPROJECT.Repositories
                 }
             }
             return null;
-        }
-
-        public int UpdateUser(int userID, string username, string password, string role)
-        {
-            using (SqlCommand cmd = new SqlCommand("UPDATE users SET Username = @Username, Password = @Password, Role = @Role WHERE UserID = @UserID", conn))
-            {
-                cmd.Parameters.AddWithValue("@Username", username);
-                cmd.Parameters.AddWithValue("@Password", password);
-                cmd.Parameters.AddWithValue("@Role", role);
-                cmd.Parameters.AddWithValue("@UserID", userID);
-                return cmd.ExecuteNonQuery();
-            }
-        }
-
-        public int DeleteUser(int userID)
-        {
-            using (SqlCommand cmd = new SqlCommand("DELETE FROM users WHERE UserID = @UserID", conn))
-            {
-                cmd.Parameters.AddWithValue("@UserID", userID);
-                return cmd.ExecuteNonQuery();
-            }
         }
 
         public void CloseConnection()
