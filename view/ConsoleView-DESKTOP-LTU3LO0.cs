@@ -12,7 +12,7 @@ namespace _12TPIPROJECT.view
 
         public string DisplayMainMenu()
         {
-            Console.WriteLine("=== Boxing App ===");
+            Console.WriteLine("Cricket Database");
             Console.WriteLine("1. Login");
             Console.WriteLine("2. Register");
             Console.WriteLine("0. Exit");

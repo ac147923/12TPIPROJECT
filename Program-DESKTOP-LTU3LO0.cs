@@ -5,35 +5,93 @@ namespace _12TPIPROJECT
 {
     public class Program
     {
-        private static StorageManager storageManager;
-        private static ConsoleView view;
-        private static User loggedInUser;
+        static StorageManager storageManager;
+        static ConsoleView view;
+        static User currentUser = null;
+
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
             string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"C:\\Users\\ac147923\\OneDrive - Avondale College\\Documents\\.2025Code\\12TPIPROJECT\\DB\\12TpiCricketDatabase.mdf\";Integrated Security=True;Connect Timeout=30";
-            storageManager = new StorageManager(connectionString);
-            view = new ConsoleView();
-
-            loggedInUser = null;
-            while (loggedInUser == null)
+            SqlConnection conn = new SqlConnection(connectionString);
+            conn.Open();
+            storageManager = new StorageManager(conn);
+            while (true)
             {
-                string choice = view.DisplayMainMenu();
-                switch (choice)
+                Console.Clear();
+                if (currentUser == null)
                 {
-                    case "1":
-                        loggedInUser = Login();
+                    ConsoleView.DisplayMainMenu();
+                    switch (Console.ReadLine())
+                    {
+                        case "1": Login(); break;
+                        case "2": Register(); break;
+                        case "0":
+                            conn.Close();
+                            return;
+                        default:
+                            ConsoleView.ShowInvalidChoice();
+                            break;
+                    }
+                }
+                else
+                {
+                    if (currentUser != null && currentUser.IsAdmin)
+                    {
+                        ShowAdminMenu();
+                    }
+                    else if (currentUser != null)
+                    {
+                        ShowUserMenu();
+                    }
+                }
+            }
+
+
+            static void Login()
+            {
+                while (true)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Login:");
+
+                    string username;
+                    do
+                    {
+                        Console.Write("Username: ");
+                        username = Console.ReadLine();
+                        if (string.IsNullOrWhiteSpace(username))
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Username cannot be blank. Please enter a valid username.");
+                        }
+                    } while (string.IsNullOrWhiteSpace(username));
+
+                    string password;
+                    do
+                    {
+                        Console.Write("Password: ");
+                        password = Console.ReadLine();
+                        if (string.IsNullOrWhiteSpace(password))
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Password cannot be blank. Please enter a valid password.");
+                        }
+                    } while (string.IsNullOrWhiteSpace(password));
+
+                    var user = storageManager.AuthenticateUser(username, password);
+                    if (user != null)
+                    {
+                        currentUser = user;
+                        Console.WriteLine("Login successful. Press Enter to continue.");
+                        Console.ReadLine();
                         break;
-                    case "2":
-                        Register();
-                        break;
-                    case "0":
-                        Exit();
-                        break;
-                    default:
-                        view.DisplayMessage("Invalid choice. Please try again.");
-                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid credentials. Press Enter to try again.");
+                        Console.ReadLine();
+                    }
                 }
             }
 
@@ -83,18 +141,15 @@ namespace _12TPIPROJECT
                         exit = true;
                         break;
                     default:
+                        Console.Clear();
                         view.DisplayMessage("Invalid option. Please try again.");
                         break;
                 }
             }
-            storageManager.CloseConnection();
+            
         }
 
-        private static bool IsAdmin()
-        {
-            return loggedInUser != null && loggedInUser.Role != null && loggedInUser.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
-        }
-
+     
         // Country Menu
         private static void CountryMenu()
         {

@@ -8,6 +8,7 @@ using _12TPIPROJECT.models;
 using _12TPIPROJECT.view;
 using _12TPIPROJECT.Repositories;
 using Microsoft.Data.SqlClient;
+using System.Net.NetworkInformation;
 
 namespace _12TPIPROJECT.Repositories
 {
@@ -15,10 +16,22 @@ namespace _12TPIPROJECT.Repositories
     public class StorageManager
     {
         private SqlConnection conn;
+
+        public StorageManager(string connectionString)
+        {
+            conn = new SqlConnection(connectionString);
+            conn.Open();
+        }
+
+        public StorageManager(SqlConnection conn)
+        {
+            this.conn = conn;
+        }
+
         public bool RegisterUser(string username, string password)
         {
 
-            string checkSql = "SELECT COUNT(*) FROM tblUser WHERE Username = @Username";
+            string checkSql = "SELECT COUNT(*) FROM users WHERE Username = @Username";
             using (SqlCommand checkCmd = new SqlCommand(checkSql, conn))
             {
                 checkCmd.Parameters.AddWithValue("@Username", username);
@@ -28,7 +41,7 @@ namespace _12TPIPROJECT.Repositories
             }
 
 
-            string insertSql = "INSERT INTO tblUser (Username, Password, IsAdmin) VALUES (@Username, @Password, 0)";
+            string insertSql = "INSERT INTO users (Username, Password, IsAdmin) VALUES (@Username, @Password, 0)";
             using (SqlCommand insertCmd = new SqlCommand(insertSql, conn))
             {
                 insertCmd.Parameters.AddWithValue("@Username", username);
@@ -40,7 +53,7 @@ namespace _12TPIPROJECT.Repositories
 
         public User AuthenticateUser(string username, string password)
         {
-            string sql = "SELECT UserID, Username, Password, IsAdmin FROM tblUser WHERE Username = @Username AND Password = @Password";
+            string sql = "SELECT UserID, Username, Password, IsAdmin FROM users WHERE Username = @Username AND Password = @Password";
             using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
                 cmd.Parameters.AddWithValue("@Username", username);
@@ -49,38 +62,21 @@ namespace _12TPIPROJECT.Repositories
                 {
                     if (reader.Read())
                     {
-                        int userID = (int)reader["UserID"];
-                        string usernameDb = reader["Username"].ToString();
-                        string pin = reader["Password"].ToString();
-                        bool isAdmin = (bool)reader["IsAdmin"];
-                        string role = isAdmin ? "Admin" : "User";
-                        return new User(userID, usernameDb, pin, role);
+                        return new User
+                        {
+                            UserID = (int)reader["UserID"],
+                            Username = reader["Username"].ToString(),
+                            Password = reader["Password"].ToString(),
+                            IsAdmin = (bool)reader["IsAdmin"]
+                        };
                     }
                 }
             }
             return null;
         }
 
-        public StorageManager(string connectionString)
-        {
-            try
-            {
-                conn = new SqlConnection(connectionString);
-                conn.Open();
-                Console.WriteLine("connection successfull");
-            }
-            catch (SqlException e)
-            {
-                Console.WriteLine("the connection was unsucessfull");
-                Console.WriteLine(e.Message);
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("the connection was successful");
-                Console.WriteLine(ex.Message);
-            }
-        }
+
 
         public List<Country> GetAllCountries()
         {
@@ -547,14 +543,9 @@ namespace _12TPIPROJECT.Repositories
             return null;
         }
 
-        public void CloseConnection()
-        {
-            if (conn != null && conn.State == ConnectionState.Open)
-            {
-                conn.Close();
-                Console.WriteLine("Connection closed");
-            }
-        }
+        
+
+
     }
 }
 
