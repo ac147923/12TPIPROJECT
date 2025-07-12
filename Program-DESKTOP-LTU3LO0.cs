@@ -1,100 +1,61 @@
-﻿using _12TPIPROJECT.view;
+﻿using System;
 using _12TPIPROJECT.Repositories;
 using _12TPIPROJECT.models;
+using _12TPIPROJECT.view;
+using System.Collections.Generic;
+
 namespace _12TPIPROJECT
 {
     public class Program
     {
         static StorageManager storageManager;
-        static ConsoleView view;
+        static View view = new View();
         static User currentUser = null;
 
-
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            string connectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"C:\\Users\\ac147923\\OneDrive - Avondale College\\Documents\\.2025Code\\12TPIPROJECT\\DB\\12TpiCricketDatabase.mdf\";Integrated Security=True;Connect Timeout=30";
-            SqlConnection conn = new SqlConnection(connectionString);
-            conn.Open();
-            storageManager = new StorageManager(conn);
-            while (true)
+            Console.WriteLine("Enter your database connection string:");
+            string connString = Console.ReadLine();
+            storageManager = new StorageManager(connString);
+
+            // Login loop
+            while (currentUser == null)
             {
-                Console.Clear();
-                if (currentUser == null)
-                {
-                    ConsoleView.DisplayMainMenu();
-                    switch (Console.ReadLine())
-                    {
-                        case "1": Login(); break;
-                        case "2": Register(); break;
-                        case "0":
-                            conn.Close();
-                            return;
-                        default:
-                            ConsoleView.ShowInvalidChoice();
-                            break;
-                    }
-                }
-                else
-                {
-                    if (currentUser != null && currentUser.IsAdmin)
-                    {
-                        ShowAdminMenu();
-                    }
-                    else if (currentUser != null)
-                    {
-                        ShowUserMenu();
-                    }
-                }
+                currentUser = Login();
             }
 
+            MainMenu();
+        }
 
-            static void Login()
+        public static bool IsAdmin()
+        {
+            return currentUser != null && currentUser.IsAdmin;
+        }
+
+        private static User Login()
+        {
+            Console.Clear();
+            view.DisplayMessage("----Login Page----\n");
+            view.DisplayMessage("Enter your username: ");
+            string username = view.GetInput();
+            view.DisplayMessage("Enter your password: ");
+            string password = view.GetInput();
+
+            var user = storageManager.AuthenticateUser(username, password);
+            if (user != null)
             {
-                while (true)
-                {
-                    Console.Clear();
-                    Console.WriteLine("Login:");
-
-                    string username;
-                    do
-                    {
-                        Console.Write("Username: ");
-                        username = Console.ReadLine();
-                        if (string.IsNullOrWhiteSpace(username))
-                        {
-                            Console.Clear();
-                            Console.WriteLine("Username cannot be blank. Please enter a valid username.");
-                        }
-                    } while (string.IsNullOrWhiteSpace(username));
-
-                    string password;
-                    do
-                    {
-                        Console.Write("Password: ");
-                        password = Console.ReadLine();
-                        if (string.IsNullOrWhiteSpace(password))
-                        {
-                            Console.Clear();
-                            Console.WriteLine("Password cannot be blank. Please enter a valid password.");
-                        }
-                    } while (string.IsNullOrWhiteSpace(password));
-
-                    var user = storageManager.AuthenticateUser(username, password);
-                    if (user != null)
-                    {
-                        currentUser = user;
-                        Console.WriteLine("Login successful. Press Enter to continue.");
-                        Console.ReadLine();
-                        break;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid credentials. Press Enter to try again.");
-                        Console.ReadLine();
-                    }
-                }
+                view.DisplayMessage("Login successful!");
+                return user;
             }
+            else
+            {
+                view.DisplayMessage("Invalid username or password. Please try again.");
+                return null;
+            }
+        }
 
+        private static void MainMenu()
+        {
             bool exit = false;
             while (!exit)
             {
@@ -138,18 +99,16 @@ namespace _12TPIPROJECT
                         UserMenu();
                         break;
                     case "0":
+                        Exit();
                         exit = true;
                         break;
                     default:
-                        Console.Clear();
                         view.DisplayMessage("Invalid option. Please try again.");
                         break;
                 }
             }
-            
         }
 
-     
         // Country Menu
         private static void CountryMenu()
         {
@@ -165,21 +124,45 @@ namespace _12TPIPROJECT
                         break;
                     case "2":
                         if (IsAdmin())
-                            UpdateCountryName();
+                        {
+                            view.DisplayMessage("Enter the country_id to update:");
+                            int countryID = view.GetIntInput();
+                            view.DisplayMessage("Enter the new country name:");
+                            string countryName = view.GetInput();
+                            int rowsAffected = storageManager.UpdateCountryName(countryID, countryName);
+                            view.DisplayMessage($"Rows affected: {rowsAffected}");
+                        }
                         else
+                        {
                             view.DisplayMessage("Only admins can update records.");
+                        }
                         break;
                     case "3":
                         if (IsAdmin())
-                            InsertNewCountry();
+                        {
+                            view.DisplayMessage("Enter new country name:");
+                            string newCountryName = view.GetInput();
+                            Country country = new Country(0, newCountryName);
+                            int generatedID = storageManager.InsertCountry(country);
+                            view.DisplayMessage($"New country inserted with ID: {generatedID}");
+                        }
                         else
+                        {
                             view.DisplayMessage("Only admins can insert records.");
+                        }
                         break;
                     case "4":
                         if (IsAdmin())
-                            DeleteCountryByName();
+                        {
+                            view.DisplayMessage("Enter the country name to delete: ");
+                            string delCountryName = view.GetInput();
+                            int delRows = storageManager.DeleteCountryByName(delCountryName);
+                            view.DisplayMessage($"Rows affected: {delRows}");
+                        }
                         else
+                        {
                             view.DisplayMessage("Only admins can delete records.");
+                        }
                         break;
                     case "0":
                         exit = true;
@@ -225,8 +208,7 @@ namespace _12TPIPROJECT
                         {
                             view.DisplayMessage("Enter new city name:");
                             string newCityName = view.GetInput();
-                            int newCityID = 0;
-                            City city1 = new City(newCityID, newCityName);
+                            City city1 = new City(0, newCityName);
                             int generatedID = storageManager.InsertCity(city1);
                             view.DisplayMessage($"New city inserted with ID: {generatedID}");
                         }
@@ -292,8 +274,7 @@ namespace _12TPIPROJECT
                         {
                             view.DisplayMessage("Enter new player name:");
                             string newPlayerName = view.GetInput();
-                            int newPlayerID = 0;
-                            Player player1 = new Player(newPlayerID, newPlayerName);
+                            Player player1 = new Player(0, newPlayerName);
                             int generatedID = storageManager.InsertPlayer(player1);
                             view.DisplayMessage($"New player inserted with ID: {generatedID}");
                         }
@@ -359,8 +340,7 @@ namespace _12TPIPROJECT
                         {
                             view.DisplayMessage("Enter new coach name:");
                             string newCoachName = view.GetInput();
-                            int newCoachID = 0;
-                            Coach coach1 = new Coach(newCoachID, newCoachName);
+                            Coach coach1 = new Coach(0, newCoachName);
                             int generatedID = storageManager.InsertCoach(coach1);
                             view.DisplayMessage($"New coach inserted with ID: {generatedID}");
                         }
@@ -426,10 +406,9 @@ namespace _12TPIPROJECT
                         {
                             view.DisplayMessage("Enter new team name:");
                             string newTeamName = view.GetInput();
-                            view.DisplayMessage("Enter city ID for the team:");
+                            view.DisplayMessage("Enter city ID:");
                             int cityID = view.GetIntInput();
-                            int newTeamID = 0;
-                            DomesticTeam team1 = new DomesticTeam(newTeamID, newTeamName, cityID);
+                            DomesticTeam team1 = new DomesticTeam(0, newTeamName, cityID);
                             int generatedID = storageManager.InsertDomesticTeam(team1);
                             view.DisplayMessage($"New team inserted with ID: {generatedID}");
                         }
@@ -524,8 +503,7 @@ namespace _12TPIPROJECT
                             int newTotalWickets = view.GetIntInput();
                             view.DisplayMessage("Enter total runs:");
                             int newTotalRuns = view.GetIntInput();
-                            int newBridgeID = 0;
-                            PlayerAndTeamBridge newBridge = new PlayerAndTeamBridge(newBridgeID, newPlayerID, newTeamID, newDateJoined, newDateLeft, newCatchesTaken, newCatchesDropped, newTotalWickets, newTotalRuns);
+                            PlayerAndTeamBridge newBridge = new PlayerAndTeamBridge(0, newPlayerID, newTeamID, newDateJoined, newDateLeft, newCatchesTaken, newCatchesDropped, newTotalWickets, newTotalRuns);
                             int generatedID = storageManager.InsertPlayerAndTeamBridge(newBridge);
                             view.DisplayMessage($"New player-team bridge inserted with ID: {generatedID}");
                         }
@@ -604,8 +582,7 @@ namespace _12TPIPROJECT
                             DateTime newDateJoined = DateTime.Parse(view.GetInput());
                             view.DisplayMessage("Enter date left (yyyy-MM-dd):");
                             DateTime newDateLeft = DateTime.Parse(view.GetInput());
-                            int newBridgeID = 0;
-                            CoachAndTeamBridge newBridge = new CoachAndTeamBridge(newBridgeID, newTeamID, newCoachID, newDateJoined, newDateLeft);
+                            CoachAndTeamBridge newBridge = new CoachAndTeamBridge(0, newTeamID, newCoachID, newDateJoined, newDateLeft);
                             int generatedID = storageManager.InsertCoachAndTeamBridge(newBridge);
                             view.DisplayMessage($"New coach-team bridge inserted with ID: {generatedID}");
                         }
@@ -649,19 +626,24 @@ namespace _12TPIPROJECT
                     case "1":
                         var users = storageManager.GetAllUsers();
                         foreach (var user in users)
-                            Console.WriteLine($"{user.UserID}, {user.Username}, {user.Pin}, {user.Role}");
+                            Console.WriteLine($"{user.UserID}, {user.Username}, Admin: {user.IsAdmin}");
                         break;
                     case "2":
                         if (IsAdmin())
                         {
-                            view.DisplayMessage("Enter username:");
-                            string username = view.GetInput();
-                            view.DisplayMessage("Enter pin:");
-                            string pin = view.GetInput();
-                            view.DisplayMessage("Enter role:");
-                            string role = view.GetInput();
-                            int userID = 0;
-                            User user1 = new User(userID, username, pin, role);
+                            view.DisplayMessage("Enter new username:");
+                            string newUsername = view.GetInput();
+                            view.DisplayMessage("Enter password:");
+                            string newPassword = view.GetInput();
+                            view.DisplayMessage("Is Admin? (true/false):");
+                            bool isAdmin = bool.Parse(view.GetInput());
+                            User user1 = new User
+                            {
+                                UserID = 0,
+                                Username = newUsername,
+                                Password = newPassword,
+                                IsAdmin = isAdmin
+                            };
                             int generatedID = storageManager.InsertUser(user1);
                             view.DisplayMessage($"New user inserted with ID: {generatedID}");
                         }
@@ -670,17 +652,6 @@ namespace _12TPIPROJECT
                             view.DisplayMessage("Only admins can insert users.");
                         }
                         break;
-                    case "3":
-                        view.DisplayMessage("Enter username:");
-                        string findUsername = view.GetInput();
-                        view.DisplayMessage("Enter pin:");
-                        string findPin = view.GetInput();
-                        var foundUser = storageManager.GetUserByUsernameAndPin(findUsername, findPin);
-                        if (foundUser != null)
-                            Console.WriteLine($"{foundUser.UserID}, {foundUser.Username}, {foundUser.Pin}, {foundUser.Role}");
-                        else
-                            view.DisplayMessage("User not found.");
-                        break;
                     case "0":
                         exit = true;
                         break;
@@ -688,76 +659,6 @@ namespace _12TPIPROJECT
                         view.DisplayMessage("Invalid option. Please try again.");
                         break;
                 }
-            }
-        }
-
-        private static void UpdateCountryName()
-        {
-            view.DisplayMessage("Enter the country_id to update:");
-            int countryID = view.GetIntInput();
-            view.DisplayMessage("Enter the new country name:");
-            string countryName = view.GetInput();
-            int rowsAffected = storageManager.UpdateCountryName(countryID, countryName);
-            view.DisplayMessage($"Rows affected: {rowsAffected}");
-        }
-
-        private static void InsertNewCountry()
-        {
-            view.DisplayMessage("Enter new country name:");
-            string countryName = view.GetInput();
-            int countryID = 0;
-            Country country1 = new Country(countryID, countryName);
-            int generatedID = storageManager.InsertCountry(country1);
-            view.DisplayMessage($"New country inserted with ID: {generatedID}");
-        }
-
-        private static void DeleteCountryByName()
-        {
-            view.DisplayMessage("Enter the country name to delete: ");
-            string countryName = view.GetInput();
-            int rowsAffected = storageManager.DeleteCountryByName(countryName);
-            view.DisplayMessage($"Rows affected: {rowsAffected}");
-        }
-
-        private static void Register()
-        {
-            Console.Clear();
-            view.DisplayMessage("----Registration Page----\n");
-            view.DisplayMessage("Enter your username: ");
-            string username = view.GetInput();
-            view.DisplayMessage("Enter your password: ");
-            string password = view.GetInput();
-
-            bool registered = storageManager.RegisterUser(username, password);
-            if (!registered)
-            {
-                view.DisplayMessage("Username already exists. Please choose a different username.");
-            }
-            else
-            {
-                view.DisplayMessage("Registration successful!");
-            }
-        }
-
-        private static User Login()
-        {
-            Console.Clear();
-            view.DisplayMessage("----Login Page----\n");
-            view.DisplayMessage("Enter your username: ");
-            string username = view.GetInput();
-            view.DisplayMessage("Enter your password: ");
-            string password = view.GetInput();
-
-            var user = storageManager.AuthenticateUser(username, password);
-            if (user != null)
-            {
-                view.DisplayMessage("Login successful!");
-                return user;
-            }
-            else
-            {
-                view.DisplayMessage("Invalid username or password. Please try again.");
-                return null;
             }
         }
 
