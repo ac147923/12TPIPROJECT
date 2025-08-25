@@ -76,6 +76,9 @@
 
 - On launch, you will see the Main Menu.
 - Register a new user or log in.
+- NOTE THE ORIGINAL ADMIN LOGIN IS: 
+  username: admin
+  password: 1234
 - Navigate through menus to manage entities or generate reports.
 - Follow on-screen prompts for input.
 - All inputs are validated; errors will be shown for invalid entries.
